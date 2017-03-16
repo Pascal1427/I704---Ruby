@@ -12,13 +12,9 @@ def char_if_pressed(last_tast)
   system('stty raw -echo') # turn raw input on
   c = nil
   c = $stdin.getc if $stdin.ready?
-
   c.chr if c
-  if c
-    return c
-  else
-    return last_tast
-  end
+  return c if c
+  return last_tast
 ensure
   system 'stty -raw echo' # turn raw input off
 end
@@ -28,7 +24,8 @@ a = Array.new(X) { Array.new(X, 'X') } # declare 2d Array
 # Build the field
 a.each.with_index do |row, row_index|
   row.each.with_index do |_column, column_index|
-    unless (column_index == 0) || (column_index == (X - 1)) || (row_index == 0) || (row_index == (X - 1))
+    unless column_index.zero? || (column_index == (X - 1)) ||
+           row_index.zero? || (row_index == (X - 1))
       row[column_index] = ' '
     end
   end
@@ -49,7 +46,7 @@ class Food
     end
   end
 end
-
+# Crash?
 class Crash
   def self.c(ar, hx, hy)
     return true if ar[hx][hy] == 'X' # is the next step the wall?
@@ -65,7 +62,6 @@ class Snake
     head << (hy - 1)
     head << hx
     head << (hy - 2)
-
     head # return the head position from the snake
   end
 
@@ -86,7 +82,6 @@ class Snake
     else
       puts('False key! Pleas play with w,a,s,d. No capital letters!')
     end
-
     newhead
   end
 
@@ -96,7 +91,7 @@ class Snake
 
   def self.go(ar, hx, hy, i)
     ar2 = ar.clone
-    for n in 0..(i - 1)
+    (0..(i - 1)).each do |n|
       ar[3 + (n * 2)] = ar2[1 + (n * 2)]
       ar[2 + (n * 2)] = ar2[0 + (n * 2)]
     end
@@ -107,7 +102,7 @@ class Snake
 
   # show the whole array of the snake
   def self.show(ar, ar2, i)
-    for n in 0..i
+    (0..i).each do |n|
       ar[ar2[(0 + (n * 2))]][ar2[(1 + (n * 2))]] = 'S'
     end
     ar[ar2[(0 + (i * 2))]][ar2[(1 + (i * 2))]] = ' '
@@ -115,13 +110,8 @@ class Snake
 
   # make sure that the steps are only forward
   def self.button_check(t, ot)
-    if (t == 'a') && (ot == 'd')
-      ot
-    elsif (t == 'd') && (ot == 'a')
-      ot
-    elsif (t == 'w') && (ot == 's')
-      ot
-    elsif (t == 's') && (ot == 'w')
+    if (t == 'a') && (ot == 'd') || (t == 'd') && (ot == 'a') ||
+       (t == 'w') && (ot == 's') || (t == 's') && (ot == 'w')
       ot
     else
       t
@@ -154,7 +144,7 @@ while gaming == true # working loop
   tast = Snake.button_check(tast, tastold) # check is the key possible
   tastold = tast # remember the last key
 
-  newhead1 = Snake.move(a, tast, newhead1[0], newhead1[1]) # move to the next point and give the head back
+  newhead1 = Snake.move(a, tast, newhead1[0], newhead1[1]) # move forward
 
   if Snake.check(a, newhead1[0], newhead1[1]) == 'X' # is there a wall?
     gaming = false
@@ -165,10 +155,10 @@ while gaming == true # working loop
     if t > 0.06
       t -= 0.05 # get faster you are bigger now
     end
-  elsif Snake.check(a, newhead1[0], newhead1[1]) == 'S' # you hit yourself?stop it!
+  elsif Snake.check(a, newhead1[0], newhead1[1]) == 'S' # you hit yourself?stop!
     gaming = false
   else
-    snake = Snake.go(snake, newhead1[0], newhead1[1], p) # go to the next step, no changes
+    snake = Snake.go(snake, newhead1[0], newhead1[1], p) # go to the next step
   end
   Snake.show(a, snake, p) # get the snake in the field array
   system 'clear' # clear the old field
